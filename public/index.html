@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patent Document Downloader</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+    <h1>Patent Document Downloader</h1>
+    <form action="#" method="POST" id="documentForm">
+        <label for="patentNumber">Document Number:</label>
+        <input type="text" id="patentNumber" name="patentNumber" required><br>
+
+        <label for="documentType">Document Number Type:</label>
+        <select id="documentType" name="documentType">
+            <option value="application">Application</option>
+            <option value="granted">Granted</option>
+        </select><br>
+
+        <div id="checkboxSection">
+            <label class="checkbox-inline" for="grantedCheckbox">
+                <input type="checkbox" id="grantedCheckbox" name="grantedCheckbox"> Granted
+            </label>
+
+            <label class="checkbox-inline1" for="filedCheckbox">
+                <input type="checkbox" id="filedCheckbox" name="patentAsFiledCheckbox"> Patent as Filed
+            </label>
+
+            <div id="subCheckboxes" style="display: none;">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="abstractCheckbox" name="abstractCheckbox" value="ABST">
+                    <label for="abstractCheckbox">Abstract</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="claimsCheckbox" name="claimsCheckbox" value="CLM">
+                    <label for="claimsCheckbox">Claims</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="specificationCheckbox" name="specificationCheckbox" value="SPEC">
+                    <label for="specificationCheckbox">Specification</label>
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <input type="submit" value="Get Document"><br>
+<button type="button" class="reset-button" onclick="location.reload();">Reset</button>
+
+
+    </form>
+
+<!-- Preloader -->
+<div id="preloader" class="preloader">
+    <div class="loader"></div>
+</div>
+
+
+    <div id="download-button-container">
+        <!-- Download button for Granted documents -->
+        <a id="downloadGrantedButton" style="display: none;" download="granted_document.pdf">
+            <p>Document ready for Download</p>
+            <button>Download Granted Document</button>
+        </a>
+
+        <!-- Download link for Application documents -->
+        <div id="download-button-container" style="display: none;">
+            <!-- Button to download the zip file -->
+            <a id="downloadApplicationLink" style="display: none;" download="downloaded.zip"
+                href="/downloaded_documents/downloaded.zip">
+                <p>Document ready for Download</p>
+        <button onclick="downloadApplicationDocument()">Download Application Document</button>
+
+            </a>
+
+            <!-- <button id="downloadZipButton">Download Zip File</button> -->
+        </div>
+    </div>
+
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <p id="message"></p>
+    <script src="script.js"></script>
+</body>
+
+</html>
