@@ -5,24 +5,24 @@ document.getElementById('documentForm').addEventListener('submit', async functio
     const grantedCheckbox = document.getElementById('grantedCheckbox');
     const patentNumber = document.getElementById('patentNumber').value;
 
-    // Show the loading message
+
     const message = document.getElementById('message');
     message.innerText = 'Fetching the document. Please wait...';
 
     if (grantedCheckbox.checked) {
-        // Create a download button for granted patents
+
         const downloadButtonContainer = document.getElementById('download-button-container');
-        downloadButtonContainer.innerHTML = ''; // Clear any previous buttons
+        downloadButtonContainer.innerHTML = ''; 
         const downloadButton = document.createElement('button');
         downloadButton.innerText = 'Download Granted Patent';
         downloadButton.addEventListener('click', async () => {
-            // Redirect to the download URL for granted patents
+           
             const grantedURL = `https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/${patentNumber}`;
             window.open(grantedURL, '_blank');
         });
         downloadButtonContainer.appendChild(downloadButton);
 
-        // Clear the loading message
+       
         message.innerText = '';
     }
 
@@ -35,6 +35,37 @@ document.getElementById('documentForm').addEventListener('submit', async functio
         if (abstractCheckbox.checked) selectedDocumentCodes.push('ABST');
         if (claimsCheckbox.checked) selectedDocumentCodes.push('CLM');
         if (specificationCheckbox.checked) selectedDocumentCodes.push('SPEC');
+
+
+
+        // const downloadButtonContainer = document.getElementById('download-button-container');
+        // downloadButtonContainer.innerHTML = '';
+        // const downloadButton = document.createElement('button');
+        // downloadButton.innerText = 'Download Filed Patent';
+        // downloadButton.addEventListener('click', async () => {
+        //     try {
+        //         // Fetch and download the combined ZIP file
+        //         const downloadResponse = await fetch('/downloaded-documents/combined_documents.zip');
+        //         if (downloadResponse.status === 200) {
+        //             const blob = await downloadResponse.blob();
+        //             const url = window.URL.createObjectURL(blob);
+        //             const a = document.createElement('a');
+        //             a.style.display = 'none';
+        //             a.href = url;
+        //             a.download = 'combined_documents.zip';
+        //             document.body.appendChild(a);
+        //             a.click();
+        //             window.URL.revokeObjectURL(url);
+        //         } else {
+        //             alert("Failed to fetch the download URL.");
+        //         }
+        //     } catch (error) {
+        //         console.error('Error:', error);
+        //         alert("Failed to fetch the download URL.");
+        //     }
+        // });
+
+        // downloadButtonContainer.appendChild(downloadButton);
 
         if (selectedDocumentCodes.length > 0) {
             try {
@@ -51,35 +82,23 @@ document.getElementById('documentForm').addEventListener('submit', async functio
                 });
 
                 if (response.status === 200) {
-                    // Clear the loading message
+                  
                     message.innerText = '';
 
-                    // Show the download button for filed patents
+                  
                     const downloadButtonContainer = document.getElementById('download-button-container');
                     downloadButtonContainer.innerHTML = '';
                     const downloadButton = document.createElement('button');
-                    downloadButton.innerText = 'Download Filed Patent';
+                    downloadButton.innerText = 'Download Combined Documents';
                     downloadButton.addEventListener('click', async () => {
-                        // Fetch and download the document for filed patents
                         try {
                             const downloadResponse = await fetch('/fetch-application-documents', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    patentNumber,
-                                }),
+                                method: 'GET', 
                             });
 
                             if (downloadResponse.status === 200) {
-                                const data = await downloadResponse.json();
-                                if (data.filePath) {
-                                    // Redirect to the download URL for filed patents
-                                    window.location.href = `${data.filePath}`;
-                                } else {
-                                    alert("Failed to fetch the download URL.");
-                                }
+                               
+                                window.location.href = '/fetch-application-documents';
                             } else {
                                 alert("Failed to fetch the download URL.");
                             }
@@ -89,6 +108,7 @@ document.getElementById('documentForm').addEventListener('submit', async functio
                         }
                     });
                     downloadButtonContainer.appendChild(downloadButton);
+
                 } else {
                     alert("Failed to trigger app.js.");
                 }
@@ -96,7 +116,8 @@ document.getElementById('documentForm').addEventListener('submit', async functio
                 console.error('Error:', error);
                 alert("Failed to trigger app.js.");
             }
-        } else {
+        }
+        else {
             alert("Please select a document to download.");
             message.innerText = '';
         }
