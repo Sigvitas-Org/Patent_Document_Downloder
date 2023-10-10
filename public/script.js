@@ -1,71 +1,72 @@
+// Clear cache function
+function clearCache() {
+    // Clear the input field
+    document.getElementById('patentNumber').value = '';
+
+    // Clear any checked checkboxes
+    document.getElementById('grantedCheckbox').checked = false;
+    document.getElementById('patentAsFiledCheckbox').checked = false;
+    document.getElementById('abstractCheckbox').checked = false;
+    document.getElementById('claimsCheckbox').checked = false;
+    document.getElementById('specificationCheckbox').checked = false;
+
+    // Hide buttons and messages
+    const downloadButtonContainer = document.getElementById('download-button-container');
+    const message = document.getElementById('message');
+    const preloader = document.getElementById('preloader');
+
+    downloadButtonContainer.style.display = 'none';
+    message.innerText = '';
+    preloader.style.display = 'none';
+}
+
+// Add click event listener to reset button
+document.getElementById('resetButton').addEventListener('click', function () {
+    clearCache();
+});
+
 document.getElementById('documentForm').addEventListener('submit', async function (event) {
     event.preventDefault();
-    const documentType = document.getElementById('documentType').value;
-    const filedCheckbox = document.getElementById('filedCheckbox');
     const grantedCheckbox = document.getElementById('grantedCheckbox');
-    const patentNumber = document.getElementById('patentNumber').value;
+    const patentNumberInput = document.getElementById('patentNumber');
+    const patentNumber = patentNumberInput.value;
+    const preloader = document.getElementById('preloader');
+    const downloadButtonContainer = document.getElementById('download-button-container');
+    const patentAsFiledCheckbox = document.getElementById('patentAsFiledCheckbox');
+    const abstractCheckbox = document.getElementById('abstractCheckbox');
+    const claimsCheckbox = document.getElementById('claimsCheckbox');
+    const specificationCheckbox = document.getElementById('specificationCheckbox');
 
+    preloader.style.display = 'block';
+    downloadButtonContainer.style.display = 'none';
 
-    const message = document.getElementById('message');
-    message.innerText = 'Fetching the document. Please wait...';
-
-    if (grantedCheckbox.checked) {
-
-        const downloadButtonContainer = document.getElementById('download-button-container');
-        downloadButtonContainer.innerHTML = ''; 
-        const downloadButton = document.createElement('button');
-        downloadButton.innerText = 'Download Granted Patent';
-        downloadButton.addEventListener('click', async () => {
-           
-            const grantedURL = `https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/${patentNumber}`;
-            window.open(grantedURL, '_blank');
-        });
-        downloadButtonContainer.appendChild(downloadButton);
-
-       
-        message.innerText = '';
+    // Validate patent number
+    if (!/^\d{8}$/.test(patentNumber)) {
+        alert("Please enter an Vaild number.");
+        preloader.style.display = 'none';
+        downloadButtonContainer.style.display = 'block';
+        return;
     }
 
-    if (filedCheckbox.checked) {
-        const abstractCheckbox = document.getElementById('abstractCheckbox');
-        const claimsCheckbox = document.getElementById('claimsCheckbox');
-        const specificationCheckbox = document.getElementById('specificationCheckbox');
+    if (grantedCheckbox.checked) {
+        try {
+            const grantedURL = `https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/${patentNumber}`;
+            window.open(grantedURL, '_blank');
+        } catch (error) {
+            console.error('Error:', error);
+            alert("Failed to fetch the download URL.");
+        } finally {
+            preloader.style.display = 'none';
+            downloadButtonContainer.style.display = 'block';
+        }
+    }
+
+    if (patentAsFiledCheckbox.checked) {
         const selectedDocumentCodes = [];
 
         if (abstractCheckbox.checked) selectedDocumentCodes.push('ABST');
         if (claimsCheckbox.checked) selectedDocumentCodes.push('CLM');
         if (specificationCheckbox.checked) selectedDocumentCodes.push('SPEC');
-
-
-
-        // const downloadButtonContainer = document.getElementById('download-button-container');
-        // downloadButtonContainer.innerHTML = '';
-        // const downloadButton = document.createElement('button');
-        // downloadButton.innerText = 'Download Filed Patent';
-        // downloadButton.addEventListener('click', async () => {
-        //     try {
-        //         // Fetch and download the combined ZIP file
-        //         const downloadResponse = await fetch('/downloaded-documents/combined_documents.zip');
-        //         if (downloadResponse.status === 200) {
-        //             const blob = await downloadResponse.blob();
-        //             const url = window.URL.createObjectURL(blob);
-        //             const a = document.createElement('a');
-        //             a.style.display = 'none';
-        //             a.href = url;
-        //             a.download = 'combined_documents.zip';
-        //             document.body.appendChild(a);
-        //             a.click();
-        //             window.URL.revokeObjectURL(url);
-        //         } else {
-        //             alert("Failed to fetch the download URL.");
-        //         }
-        //     } catch (error) {
-        //         console.error('Error:', error);
-        //         alert("Failed to fetch the download URL.");
-        //     }
-        // });
-
-        // downloadButtonContainer.appendChild(downloadButton);
 
         if (selectedDocumentCodes.length > 0) {
             try {
@@ -82,54 +83,48 @@ document.getElementById('documentForm').addEventListener('submit', async functio
                 });
 
                 if (response.status === 200) {
-                  
-                    message.innerText = '';
-
-                  
-                    const downloadButtonContainer = document.getElementById('download-button-container');
-                    downloadButtonContainer.innerHTML = '';
-                    const downloadButton = document.createElement('button');
-                    downloadButton.innerText = 'Download Combined Documents';
-                    downloadButton.addEventListener('click', async () => {
-                        try {
-                            const downloadResponse = await fetch('/fetch-application-documents', {
-                                method: 'GET', 
-                            });
-
-                            if (downloadResponse.status === 200) {
-                               
-                                window.location.href = '/fetch-application-documents';
-                            } else {
-                                alert("Failed to fetch the download URL.");
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert("Failed to fetch the download URL.");
-                        }
-                    });
-                    downloadButtonContainer.appendChild(downloadButton);
-
+                    // Directly trigger download after processing
+                    window.location.href = '/fetch-application-documents';
                 } else {
                     alert("Failed to trigger app.js.");
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert("Failed to trigger app.js.");
+            } finally {
+                preloader.style.display = 'none';
+                downloadButtonContainer.style.display = 'block';
             }
-        }
-        else {
+        } else {
             alert("Please select a document to download.");
-            message.innerText = '';
+            preloader.style.display = 'none';
+            downloadButtonContainer.style.display = 'block';
         }
     }
 });
 
-document.getElementById('filedCheckbox').addEventListener('change', function () {
+document.getElementById('patentAsFiledCheckbox').addEventListener('change', function () {
     const subCheckboxes = document.getElementById('subCheckboxes');
+    const getPatentAsFiledButton = document.getElementById('getPatentAsFiledButton');
 
     if (this.checked) {
         subCheckboxes.style.display = 'block';
+        getPatentAsFiledButton.style.display = 'block';
     } else {
         subCheckboxes.style.display = 'none';
+        getPatentAsFiledButton.style.display = 'none';
     }
+});
+
+document.getElementById('grantedCheckbox').addEventListener('change', function () {
+    const getGrantedButton = document.getElementById('getGrantedButton');
+
+    if (this.checked) {
+        getGrantedButton.style.display = 'block';
+    } else {
+        getGrantedButton.style.display = 'none';
+    }
+});
+window.addEventListener('load', function () {
+    clearCache();
 });

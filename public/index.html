@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,64 +20,60 @@
             <option value="granted">Granted</option>
         </select><br>
 
-        <div id="checkboxSection">
-            <label class="checkbox-inline" for="grantedCheckbox">
-                <input type="checkbox" id="grantedCheckbox" name="grantedCheckbox"> Granted
-            </label>
+        <div id="patentCheckboxes" class="checkbox-container">
+            <div class="column">
+                <label class="checkbox-inline1" for="patentAsFiledCheckbox">
+                    <input type="checkbox" id="patentAsFiledCheckbox" name="patentAsFiledCheckbox"> Patent as Filed
+                </label>
+                <div id="subCheckboxes" style="display: none;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="abstractCheckbox" name="abstractCheckbox" value="ABST">
+                        <label for="abstractCheckbox">Abstract</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="claimsCheckbox" name="claimsCheckbox" value="CLM">
+                        <label for="claimsCheckbox">Claims</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="specificationCheckbox" name="specificationCheckbox" value="SPEC">
+                        <label for="specificationCheckbox">Specification</label>
+                    </div>
+                    <button type="submit" id="getPatentAsFiledButton" style="display: none;">Get Patent as Filed</button>
 
-            <label class="checkbox-inline1" for="filedCheckbox">
-                <input type="checkbox" id="filedCheckbox" name="patentAsFiledCheckbox"> Patent as Filed
-            </label>
-
-            <div id="subCheckboxes" style="display: none;">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="abstractCheckbox" name="abstractCheckbox" value="ABST">
-                    <label for="abstractCheckbox">Abstract</label>
-                </div>
-                <div class="checkbox-group1">
-                    <input type="checkbox" id="claimsCheckbox" name="claimsCheckbox" value="CLM">
-                    <label for="claimsCheckbox">Claims</label>
-                </div>
-                <div class="checkbox-group2">
-                    <input type="checkbox" id="specificationCheckbox" name="specificationCheckbox" value="SPEC">
-                    <label for="specificationCheckbox">Specification</label>
                 </div>
             </div>
+            <div class="column">
+                <label class="checkbox-inline1" for="grantedCheckbox">
+                    <input type="checkbox" id="grantedCheckbox" name="grantedCheckbox"> Granted
+                </label>
+            </div>
         </div>
-
-        <br>
-        <input type="submit" value="Get Document"><br>
-<button type="button" class="reset-button" onclick="location.reload();">Reset</button>
-
-
+            <br>
+            <button type="submit" id="getGrantedButton" style="display: none;">Get Granted Document</button>
+            <!-- <input type="submit" value="Get Document"><br> -->
+            <br>
+            <br>
+            <button type="button" id="resetButton" class="reset-button" onclick="location.reload();">Reset</button>
     </form>
-
-
-<div id="preloader" class="preloader">
-    <div class="loader"></div>
-</div>
-
-
+    <div id="preloader" class="preloader">
+        <div class="loader"></div>
+    </div>
     <div id="download-button-container">
         <a id="downloadGrantedButton" style="display: none;" download="granted_document.pdf">
             <p>Document ready for Download</p>
             <button>Download Granted Document</button>
         </a>
-
-
         <div id="download-button-container" style="display: none;">
             <a id="downloadApplicationLink" style="display: none;" download="downloaded.zip"
                 href="../downloaded_documents/downloaded.zip">
                 <p>Document ready for Download</p>
-        <button onclick="downloadApplicationDocument()">Download Application Document</button>
+                <button onclick="downloadApplicationDocument()">Download Application Document</button>
             </a>
         </div>
     </div>
-
     <div id="progress-container">
         <div id="progress-bar"></div>
     </div>
-
     <p id="message"></p>
     <script src="script.js"></script>
 </body>
