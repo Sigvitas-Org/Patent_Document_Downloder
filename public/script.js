@@ -25,8 +25,10 @@ document.getElementById('resetButton').addEventListener('click', function () {
     clearCache();
 });
 
-//Get Granted directly 
 
+
+
+// Get Granted if application & Granted is checked
 document.getElementById('getGrantedButton').addEventListener('click', async function () {
     const documentType = document.getElementById('documentType').value;
     const applicationNumber = document.getElementById('patentNumber').value;
@@ -49,63 +51,187 @@ document.getElementById('getGrantedButton').addEventListener('click', async func
     }
 });
 
-
-// ##################################################
+// Get Patent as Filed is Checked
 document.getElementById('getPatentAsFiledButton').addEventListener('click', async function () {
+    const documentType = document.getElementById('documentType').value;
+    const patentNumberInput = document.getElementById('patentNumber');
+    const patentNumber = patentNumberInput.value;
+    const preloader = document.getElementById('preloader');
+    const downloadButtonContainer = document.getElementById('download-button-container');
+    const patentAsFiledCheckbox = document.getElementById('patentAsFiledCheckbox');
     const abstractCheckbox = document.getElementById('abstractCheckbox');
     const claimsCheckbox = document.getElementById('claimsCheckbox');
     const specificationCheckbox = document.getElementById('specificationCheckbox');
-    const patentNumberInput = document.getElementById('patentNumber');
-    const preloader = document.getElementById('preloader');
-    const downloadButtonContainer = document.getElementById('download-button-container');
+    const loadingMessage = document.getElementById('loadingMessage');
 
     preloader.style.display = 'block';
     downloadButtonContainer.style.display = 'none';
 
-    const patentNumber = patentNumberInput.value;
+    // Validate patent number
+    // if (!/^\d{8}$/.test(patentNumber)) {
+    //     alert('Please enter a valid number.');
+    //     preloader.style.display = 'none';
+    //     downloadButtonContainer.style.display = 'block';
+    //     return;
+    // }
 
-    try {
-        // Create a request body with the patentNumber
-        const requestData = {
-            patentNumber: patentNumber
-        };
+    // ...
+    // ...
+    
+    if (documentType === 'granted' && patentAsFiledCheckbox.checked) {
+        const selectedDocumentCodes = [];
 
-        const response = await fetch('/fetch-patent-application', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        });
+        if (abstractCheckbox.checked) selectedDocumentCodes.push('ABST');
+        if (claimsCheckbox.checked) selectedDocumentCodes.push('CLM');
+        if (specificationCheckbox.checked) selectedDocumentCodes.push('SPEC');
 
-        if (response.status === 200) {
-            const data = await response.json();
-            const applicationNumberText = data.applicationNumberText;
+        if (selectedDocumentCodes.length > 0) {
+            try {
+                // Send a request to fetch data from USPTO
+                const apiUrl = `https://patentcenter.uspto.gov/retrieval/public/v2/application/data?patentNumber=${patentNumber}`;
+                const response = await fetch(apiUrl);
 
-            if (applicationNumberText) {
-                // Log the application number text in the console
-                console.log('Application Number Text:', applicationNumberText);
-            } else {
-                alert("Application number not found in the response.");
+                if (response.status === 200) {
+                    const data = await response.json();
+                    const applicationNumberText = data.applicationMetaData.applicationIdentification.applicationNumberText.trim();
+
+                    // Log the Application Number for confirmation
+                    console.log('Application Number:', applicationNumberText);
+
+                    // Send the "applicationNumberText" to the server
+                    const serverResponse = await fetch('/process-application-number', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            applicationNumberText,
+                        }),
+                    });
+
+                    if (serverResponse.status === 200) {
+                        alert('Application number sent successfully.');
+                    } else {
+                        alert('Failed to send application number to the server.');
+                    }
+                } else {
+                    alert('Failed to fetch application data.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to fetch application data.');
+            } finally {
+                preloader.style.display = 'none';
+                downloadButtonContainer.style.display = 'block';
             }
         } else {
-            alert("Failed to fetch application data.");
+            alert('Please select at least one sub-document to download.');
+            preloader.style.display = 'none';
+            downloadButtonContainer.style.display = 'block';
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert("Failed to fetch the application data.");
-    } finally {
-        preloader.style.display = 'none';
-        downloadButtonContainer.style.display = 'block';
+    }
+    // ...
+
+
+});
+
+// ####
+
+document.getElementById('getPatentAsFiledButton').addEventListener('click', async function () {
+    const documentType = document.getElementById('documentType').value;
+    const patentNumberInput = document.getElementById('patentNumber');
+    const patentNumber = patentNumberInput.value;
+    const preloader = document.getElementById('preloader');
+    const downloadButtonContainer = document.getElementById('download-button-container');
+    const patentAsFiledCheckbox = document.getElementById('patentAsFiledCheckbox');
+    const abstractCheckbox = document.getElementById('abstractCheckbox');
+    const claimsCheckbox = document.getElementById('claimsCheckbox');
+    const specificationCheckbox = document.getElementById('specificationCheckbox');
+    const loadingMessage = document.getElementById('loadingMessage');
+
+    preloader.style.display = 'block';
+    downloadButtonContainer.style.display = 'none';
+
+    // Validate patent number
+    // if (!/^\d{8}$/.test(patentNumber)) {
+    //     alert('Please enter a valid number.');
+    //     preloader.style.display = 'none';
+    //     downloadButtonContainer.style.display = 'block';
+    //     return;
+    // }
+
+    if (documentType === 'granted' && patentAsFiledCheckbox.checked) {
+        const selectedDocumentCodes = [];
+
+        if (abstractCheckbox.checked || claimsCheckbox.checked || specificationCheckbox.checked) {
+            if (abstractCheckbox.checked) selectedDocumentCodes.push('ABST');
+            if (claimsCheckbox.checked) selectedDocumentCodes.push('CLM');
+            if (specificationCheckbox.checked) selectedDocumentCodes.push('SPEC');
+
+            try {
+                // Send a request to the server-side route
+                const response = await fetch('/fetch-patent-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        patentNumber,
+                    }),
+                });
+
+                if (response.status === 200) {
+                    const data = await response.json();
+                    const applicationNumberText = data.applicationNumberText;
+
+                    // Check if the user has selected at least one sub-document
+                    if (selectedDocumentCodes.length > 0) {
+                        // Prepare the request body for trigger-app.js
+                        const documentCodesString = selectedDocumentCodes.join(',');
+                        const triggerAppData = {
+                            patentNumber: applicationNumberText, // Use the received application number
+                            documentCodes: documentCodesString,
+                        };
+
+                        // Send the request to trigger-app.js
+                        const triggerAppResponse = await fetch('/trigger-app-js', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(triggerAppData),
+                        });
+
+                        if (triggerAppResponse.status === 200) {
+                            // Redirect to the page to download documents
+                            window.location.href = '/fetch-application-documents';
+                        } else {
+                            alert("Failed to trigger app.js.");
+                        }
+                    } else {
+                        alert('Please select at least one sub-document to download.');
+                    }
+                } else {
+                    alert('Failed to fetch application data.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to fetch application data.');
+            } finally {
+                preloader.style.display = 'none';
+                downloadButtonContainer.style.display = 'block';
+            }
+        } else {
+            alert('Please select at least one sub-document to download.');
+            preloader.style.display = 'none';
+            downloadButtonContainer.style.display = 'block';
+        }
     }
 });
 
 
-
-
-
-
-
+// Get Granted if application & Granted is checked 
+// Start//
 document.getElementById('getGrantedButton').addEventListener('click', async function () {
     const documentType = document.getElementById('documentType').value;
     const applicationNumber = document.getElementById('patentNumber').value;
@@ -143,7 +269,11 @@ document.getElementById('getGrantedButton').addEventListener('click', async func
         }
     }
 });
+// END //
 
+
+
+//  Patent as Filed is Checked 
 document.getElementById('documentForm').addEventListener('submit', async function (event) {
     event.preventDefault();
     const grantedCheckbox = document.getElementById('grantedCheckbox');
@@ -160,61 +290,158 @@ document.getElementById('documentForm').addEventListener('submit', async functio
     downloadButtonContainer.style.display = 'none';
 
     // Validate patent number
-    // if (!/^\d{8}$/.test(patentNumber)) {
+    // if (!/^\d{5}$/.test(patentNumber)) {
     //     alert("Please enter a valid number.");
     //     preloader.style.display = 'none';
     //     downloadButtonContainer.style.display = 'block';
     //     return;
     // }
 
-    if (patentAsFiledCheckbox.checked) {
+    if (selectedDocumentCodes.length > 0) {
+        try {
+            let postBody = {
+                documentCodes: documentCodesString,
+            };
+
+            // Check your condition here
+            if (documentType === 'granted' && patentAsFiledCheckbox.checked) {
+                const selectedDocumentCodes = [];
+                // Fetch and add the application number to the request body
+                const response = await fetch(`/fetch-patent-data?patentNumber=${patentNumber}`, {
+                    method: 'GET',
+                });
+
+                if (response.status === 200) {
+                    const data = await response.json();
+                    postBody.applicationNumberText = data.applicationNumberText;
+                } else {
+                    alert("Failed to fetch application data.");
+                    return;
+                }
+            } else {
+                postBody.patentNumber = patentNumber;
+            }
+
+            const response = await fetch('/trigger-app-js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postBody),
+            });
+
+            if (response.status === 200) {
+                // Directly trigger download after processing
+                window.location.href = '/fetch-application-documents';
+            } else {
+                alert("Failed to trigger app.js.");
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert("Failed to trigger app.js.");
+        } finally {
+            preloader.style.display = 'none';
+            downloadButtonContainer.style.display = 'block';
+        }
+    } else {
+        alert("Please select a document to download.");
+        preloader.style.display = 'none';
+        downloadButtonContainer.style.display = 'block';
+    }
+
+});
+// ####################################
+
+document.getElementById('getPatentAsFiledButton').addEventListener('click', async function () {
+    const documentType = document.getElementById('documentType').value;
+    const patentNumberInput = document.getElementById('patentNumber');
+    const patentNumber = patentNumberInput.value;
+    const preloader = document.getElementById('preloader');
+    const downloadButtonContainer = document.getElementById('download-button-container');
+    const patentAsFiledCheckbox = document.getElementById('patentAsFiledCheckbox');
+    const abstractCheckbox = document.getElementById('abstractCheckbox');
+    const claimsCheckbox = document.getElementById('claimsCheckbox');
+    const specificationCheckbox = document.getElementById('specificationCheckbox');
+    const loadingMessage = document.getElementById('loadingMessage');
+
+    preloader.style.display = 'block';
+    downloadButtonContainer.style.display = 'none';
+
+    // Validate patent number
+    if (!/^\d{8}$/.test(patentNumber)) {
+        alert('Please enter a valid number.');
+        preloader.style.display = 'none';
+        downloadButtonContainer.style.display = 'block';
+        return;
+    }
+
+    if (documentType === 'application' && patentAsFiledCheckbox.checked) {
         const selectedDocumentCodes = [];
 
-        if (abstractCheckbox.checked) selectedDocumentCodes.push('ABST');
-        if (claimsCheckbox.checked) selectedDocumentCodes.push('CLM');
-        if (specificationCheckbox.checked) selectedDocumentCodes.push('SPEC');
+        if (abstractCheckbox.checked || claimsCheckbox.checked || specificationCheckbox.checked) {
+            if (abstractCheckbox.checked) selectedDocumentCodes.push('ABST');
+            if (claimsCheckbox.checked) selectedDocumentCodes.push('CLM');
+            if (specificationCheckbox.checked) selectedDocumentCodes.push('SPEC');
 
-        if (selectedDocumentCodes.length > 0) {
             try {
-                const documentCodesString = selectedDocumentCodes.join(',');
-                const requestData = {
-                    patentNumber: applicationNumberText, // Use applicationNumberText as patentNumber
-                    documentCodes: documentCodesString,
-                };
-
-                // Log the requestData before sending the request
-                console.log('Request Data:', requestData);
-
-                const response = await fetch('/trigger-app-js', {
+                // Send a request to the server-side route
+                const response = await fetch('/fetch-patent-data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestData),
+                    body: JSON.stringify({
+                        patentNumber,
+                    }),
                 });
 
-                console.log('Request Response:', response);
-
                 if (response.status === 200) {
-                    window.location.href = '/fetch-application-documents';
+                    const data = await response.json();
+                    const applicationNumberText = data.applicationNumberText;
+
+                    // Check if the user has selected at least one sub-document
+                    if (selectedDocumentCodes.length > 0) {
+                        // Prepare the request body for trigger-app.js
+                        const documentCodesString = selectedDocumentCodes.join(',');
+                        const triggerAppData = {
+                            patentNumber,
+                            documentCodes: documentCodesString,
+                        };
+
+                        // Send the request to trigger-app.js
+                        const triggerAppResponse = await fetch('/trigger-app-js', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(triggerAppData),
+                        });
+
+                        if (triggerAppResponse.status === 200) {
+                            // Redirect to the page to download documents
+                            window.location.href = '/fetch-application-documents';
+                        } else {
+                            alert("Failed to trigger app.js.");
+                        }
+                    } else {
+                        alert('Please select at least one sub-document to download.');
+                    }
                 } else {
-                    alert("Failed to trigger app.js.");
+                    alert('Failed to fetch application data.');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert("Failed to trigger app.js.");
+                alert('Failed to fetch application data.');
             } finally {
                 preloader.style.display = 'none';
                 downloadButtonContainer.style.display = 'block';
             }
         } else {
-            alert("Please select a document to download.");
+            alert('Please select at least one sub-document to download.');
             preloader.style.display = 'none';
             downloadButtonContainer.style.display = 'block';
         }
     }
-
-
 });
 
 

@@ -45,6 +45,16 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.post('/process-application-number', (req, res) => {
+    const { applicationNumber } = req.body; // Extract the application number from the request body
+
+    // Handle the application number as needed (e.g., process it, store it, etc.)
+    console.log('Received Application Number:', applicationNumber);
+
+    // Send a response (you can modify this part as needed)
+    res.json({ message: 'Application number received successfully' });
+});
+
 app.post('/store-granted-response', (req, res) => {
     const { response } = req.body;
 
@@ -88,7 +98,7 @@ app.post('/trigger-app-js', async (req, res) => {
 
             const downloadPromises = [];
 
- 
+
             for (const docCode of selectedDocumentCodes) {
                 const requestData = {
                     numbers: patentNumber,
@@ -97,19 +107,19 @@ app.post('/trigger-app-js', async (req, res) => {
                     document_code: docCode,
                     desired_apps_extended_info: false,
                 };
-
+                console.log('Request Body:', req.body);
                 headers.Authorization = `Bearer ${accessToken}`;
 
-  
+
                 downloadPromises.push(
                     axios.post(`${baseUrl}/download-available-documents/`, requestData, { headers })
                 );
             }
 
-      
+
             const downloadResponses = await Promise.all(downloadPromises);
 
-     
+
             const downloadedFilePaths = [];
 
             for (let i = 0; i < downloadResponses.length; i++) {
@@ -119,7 +129,7 @@ app.post('/trigger-app-js', async (req, res) => {
                 if (response.status === 200) {
                     const downloadUrl = response.data.results.download_all_documents_as_zip.url;
 
-                  
+
                     const fileResponse = await axios({
                         method: 'GET',
                         url: downloadUrl,
@@ -129,7 +139,7 @@ app.post('/trigger-app-js', async (req, res) => {
 
                     const uniqueFileName = `downloaded_${docCode}.zip`;
 
-         
+
                     const responseFilePath = path.join(__dirname, 'downloaded_documents', uniqueFileName);
                     const writer = fs.createWriteStream(responseFilePath);
                     fileResponse.data.pipe(writer);
@@ -145,7 +155,7 @@ app.post('/trigger-app-js', async (req, res) => {
                 }
             }
 
-          
+
             const combinedZipFilePath = await combineFilesIntoZip(downloadedFilePaths);
 
             res.download(combinedZipFilePath, 'combined_documents.zip', (err) => {
@@ -264,34 +274,33 @@ app.post('/fetch-granted-patent', async (req, res) => {
 //     }
 // });
 
-app.post('/fetch-patent-application', async (req, res) => {
+// Server-side route to handle download request
+app.post('/fetch-patent-data', async (req, res) => {
+    const { patentNumber } = req.body;
+
     try {
-        const { patentNumber } = req.body;
+        // Construct the URL for the API request
+        const apiUrl = `https://patentcenter.uspto.gov/retrieval/public/v2/application/data?patentNumber=${patentNumber}`;
 
-        const response = await axios.get(`https://patentcenter.uspto.gov/retrieval/public/v2/application/data?patentNumber=${patentNumber}`);
+        const response = await axios.get(apiUrl);
+        const responseData = response.data;
 
-        if (response.status === 200) {
-            // Extract applicationNumberText from the response
-            const applicationNumberText = response.data.applicationMetaData.applicationIdentification.applicationNumberText;
+        // Extract the "applicationNumberText" from the response
+        const applicationNumberText = responseData.applicationMetaData.applicationIdentification.applicationNumberText.trim();
 
-            if (applicationNumberText) {
-                // Log the response data you're interested in
-                console.log('Application Number Text:', applicationNumberText);
+        // Store the response data in a local file
+        // You may modify this part to store the response in a directory
+        fs.writeFileSync(`responses/${patentNumber}.json`, JSON.stringify(responseData, null, 2));
 
-                res.json({ message: 'Application data fetched successfully.' });
-            } else {
-                console.error('Application number not found in the response.');
-                res.status(400).send('Application number not found in the response.');
-            }
-        } else {
-            console.error('Failed to fetch application data.');
-            res.status(500).send('Failed to fetch application data.');
-        }
+        // Pass the application number to the client-side
+        res.json({ applicationNumberText });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).send(`Error: ${error.message}`);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
 
 
 
