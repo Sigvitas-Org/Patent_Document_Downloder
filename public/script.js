@@ -15,7 +15,7 @@ function clearCache() {
     const message = document.getElementById('message');
     const preloader = document.getElementById('preloader');
 
-    downloadButtonContainer.style.display = 'none';
+    downloadButtonContainer.style.display = 'block';
     message.innerText = '';
     preloader.style.display = 'none';
 }
@@ -24,6 +24,141 @@ function clearCache() {
 document.getElementById('resetButton').addEventListener('click', function () {
     clearCache();
 });
+
+
+document.getElementById('getGrantedButton').addEventListener('click', async function () {
+    const documentType = document.getElementById('documentType').value;
+    const applicationNumber = document.getElementById('patentNumber').value;
+    const loadingMessage = document.getElementById('loadingMessage');
+
+    if (documentType === 'application' && grantedCheckbox) {
+        try {
+            const response = await fetch('/fetch-granted-patent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    applicationNumber,
+                }),
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                if (data.pdfDownloadURL) {
+                    // Open the granted document in a new tab
+                    window.open(data.pdfDownloadURL, '_blank');
+                } else {
+                    alert("Failed to retrieve the PDF download URL.");
+                }
+            } else {
+                alert("No Granted Patent available.");
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert("Failed to fetch the application data.");
+        } finally {
+            // Hide the loading message
+            loadingMessage.style.display = 'none';
+        }
+    }
+});
+
+
+
+// -------------------------------------------------------------------------------------------
+// document.getElementById('getGrantedButton').addEventListener('click', async function () {
+//     const documentType = document.getElementById('documentType').value; 
+//     const applicationNumber = document.getElementById('patentNumber').value;
+
+//     if (documentType === 'application' && grantedCheckbox) {
+//         try {
+//             const response = await fetch('/fetch-granted-patent', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//                 body: JSON.stringify({
+//                     applicationNumber,
+//                 }),
+//             });
+
+//             if (response.status === 200) {
+//                 const data = await response.json();
+//                 if (data.pdfDownloadURL) {
+//                     // Open the granted document in a new tab
+//                     window.open(data.pdfDownloadURL, '_blank');
+//                 } else {
+//                     alert("Failed to retrieve the PDF download URL.");
+//                 }
+//             } else {
+//                 alert("No Granted Patent available.");
+//             }
+//         } catch (error) {
+//             console.error('Error:', error);
+//             alert("Failed to fetch the application data.");
+//         } finally {
+//             const loadingMessage = document.getElementById('loadingMessage');
+//             loadingMessage.style.display = 'none';
+//         }
+//     }
+// });
+
+// -------------------------------------------------------------------------------------------
+
+// document.getElementById('getGrantedButton').addEventListener('click', async function () {
+//     const documentType = document.getElementById('documentType').value;
+//     const applicationNumber = document.getElementById('patentNumber').value;
+
+//     if (documentType === 'application' && grantedCheckbox) {
+//         try {
+//             const response = await fetch('/fetch-granted-patent', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//                 body: JSON.stringify({
+//                     applicationNumber,
+//                 }),
+//             });
+
+//             if (response.status === 200) {
+//                 const data = await response.json();
+//                 const applicationMetaData = data.applicationMetaData || {};
+//                 const patentNumber = applicationMetaData.patentNumber || '';
+
+//                 if (patentNumber) {
+//                     // Construct the PDF file URL using the patent number
+//                     const pdfDownloadURL = `https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/${patentNumber}`;
+
+//                     // Create an invisible anchor element to trigger the download
+//                     const anchor = document.createElement('a');
+//                     anchor.href = pdfDownloadURL;
+//                     anchor.target = '_blank';
+//                     anchor.download = `granted_patent.pdf`;
+//                     anchor.style.display = 'none';
+//                     document.body.appendChild(anchor);
+
+//                     // Trigger a click event on the anchor element
+//                     anchor.click();
+//                 } else {
+//                     alert("Patent number not found in the response.");
+//                 }
+//             } else {
+//                 alert("No Granted Patent available.");
+//             }
+//         } catch (error) {
+//             console.error('Error:', error);
+//             alert("Failed to fetch the application data.");
+//         } finally {
+//             const loadingMessage = document.getElementById('loadingMessage');
+//             loadingMessage.style.display = 'none';
+//         }
+//     }
+// });
+
+
+
 
 document.getElementById('documentForm').addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -42,23 +177,10 @@ document.getElementById('documentForm').addEventListener('submit', async functio
 
     // Validate patent number
     if (!/^\d{8}$/.test(patentNumber)) {
-        alert("Please enter an Vaild number.");
+        alert("Please enter a valid number.");
         preloader.style.display = 'none';
         downloadButtonContainer.style.display = 'block';
         return;
-    }
-
-    if (grantedCheckbox.checked) {
-        try {
-            const grantedURL = `https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/${patentNumber}`;
-            window.open(grantedURL, '_blank');
-        } catch (error) {
-            console.error('Error:', error);
-            alert("Failed to fetch the download URL.");
-        } finally {
-            preloader.style.display = 'none';
-            downloadButtonContainer.style.display = 'block';
-        }
     }
 
     if (patentAsFiledCheckbox.checked) {
@@ -102,6 +224,7 @@ document.getElementById('documentForm').addEventListener('submit', async functio
         }
     }
 });
+
 
 document.getElementById('patentAsFiledCheckbox').addEventListener('change', function () {
     const subCheckboxes = document.getElementById('subCheckboxes');

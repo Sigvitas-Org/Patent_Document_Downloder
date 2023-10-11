@@ -14,6 +14,7 @@ app.use(bodyParser.json());
 app.use(express.static('public', { extensions: ['html', 'css'] }));
 const zipFilePath = path.join(__dirname, 'downloaded_documents', 'downloaded.zip');
 app.use('/downloaded-documents', express.static(path.join(__dirname, 'downloaded_documents')));
+app.use(express.static('downloads'));
 
 const baseUrl = 'https://patents.tvornica.net/api';
 const loginUrl = `${baseUrl}/login/`;
@@ -42,6 +43,32 @@ function readAccessToken() {
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.post('/store-granted-response', (req, res) => {
+    const { response } = req.body;
+
+    if (!response) {
+        res.status(400).send('Invalid response data');
+        return;
+    }
+
+    // Store the response data on the server
+    const responseJSON = JSON.stringify(response, null, 2);
+
+    // Define the path and filename where you want to save the response
+    const filePath = path.join(__dirname, 'responses', 'granted-response.json');
+
+    // Write the response to a file
+    fs.writeFile(filePath, responseJSON, (err) => {
+        if (err) {
+            console.error('Error writing response to file:', err);
+            res.status(500).send('Error storing the response');
+        } else {
+            console.log('Response stored successfully');
+            res.status(200).send('Response stored successfully');
+        }
+    });
 });
 
 app.post('/trigger-app-js', async (req, res) => {
@@ -170,6 +197,73 @@ app.get('/fetch-application-documents', (req, res) => {
         }
     });
 });
+
+
+app.post('/fetch-granted-patent', async (req, res) => {
+    const { applicationNumber } = req.body;
+
+    if (!applicationNumber) {
+        return res.status(400).send('Application number is required.');
+    }
+
+    try {
+        // Send a request to an external API
+        const response = await axios.get(`https://patentcenter.uspto.gov/retrieval/public/v2/application/data?applicationNumberText=${applicationNumber}`);
+
+        const data = response.data;
+        const applicationMetaData = data.applicationMetaData || {};
+        const patentNumber = applicationMetaData.patentNumber || '';
+
+        if (patentNumber) {
+            // Construct the download URL using the patentNumber
+            const pdfDownloadURL = `https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/${patentNumber}`;
+
+            // Define the path where you want to save the JSON file
+            const filePath = path.join(__dirname, 'downloads', `${patentNumber}.json`);
+
+            // Save the response data as a JSON file
+            fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+
+            // Respond with the download URL
+            res.json({ pdfDownloadURL });
+        } else {
+            res.status(500).json({ message: 'Patent number not found in response.' });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error fetching data from USPTO.' });
+    }
+});
+// app.post('/fetch-granted-patent', async (req, res) => {
+//     const { applicationNumber } = req.body;
+
+//     if (!applicationNumber) {
+//         return res.status(400).send('Application number is required.');
+//     }
+
+//     try {
+//         const response = await axios.get(
+//             `https://patentcenter.uspto.gov/retrieval/public/v2/application/data?applicationNumberText=${applicationNumber}`
+//         );
+
+//         const data = response.data;
+
+//         // Define the path where you want to save the JSON file
+//         const filePath = path.join(__dirname, 'application_data.json');
+
+//         fs.writeFile(filePath, JSON.stringify(data, null, 2), (err) => {
+//             if (err) {
+//                 console.error('Error writing application data to file:', err);
+//                 res.status(500).json({ message: 'Error saving application data.' });
+//             } else {
+//                 res.json({ message: 'Data saved successfully.' });
+//             }
+//         });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error fetching data from USPTO.' });
+//     }
+// });
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

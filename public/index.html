@@ -15,7 +15,9 @@
         <input type="text" id="patentNumber" name="patentNumber" required><br>
 
         <label for="documentType">Document Number Type:</label>
+        <!-- <lable>Slect Document Type</lable> -->
         <select id="documentType" name="documentType">
+            <option value="" disabled selected hidden>Select Document Type</option>
             <option value="application">Application</option>
             <option value="granted">Granted</option>
         </select><br>
@@ -44,10 +46,11 @@
             </div>
             <div class="column">
                 <label class="checkbox-inline1" for="grantedCheckbox">
-                    <input type="checkbox" id="grantedCheckbox" name="grantedCheckbox"> Granted
+                    <input type="checkbox" id="grantedCheckbox" name="grantedCheckbox">Patent as Granted
                 </label>
             </div>
         </div>
+            <br>
             <br>
             <button type="submit" id="getGrantedButton" style="display: none;">Get Granted Document</button>
             <!-- <input type="submit" value="Get Document"><br> -->
