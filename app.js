@@ -46,12 +46,12 @@ app.get('/', (req, res) => {
 });
 
 app.post('/process-application-number', (req, res) => {
-    const { applicationNumber } = req.body; 
+    const { applicationNumber } = req.body; // Extract the application number from the request body
 
-   
+    // Handle the application number as needed (e.g., process it, store it, etc.)
     console.log('Received Application Number:', applicationNumber);
 
-
+    // Send a response (you can modify this part as needed)
     res.json({ message: 'Application number received successfully' });
 });
 
@@ -63,12 +63,13 @@ app.post('/store-granted-response', (req, res) => {
         return;
     }
 
- 
+    // Store the response data on the server
     const responseJSON = JSON.stringify(response, null, 2);
 
-
+    // Define the path and filename where you want to save the response
     const filePath = path.join(__dirname, 'responses', 'granted-response.json');
 
+    // Write the response to a file
     fs.writeFile(filePath, responseJSON, (err) => {
         if (err) {
             console.error('Error writing response to file:', err);
@@ -216,7 +217,7 @@ app.post('/fetch-granted-patent', async (req, res) => {
     }
 
     try {
-     
+        // Send a request to an external API
         const response = await axios.get(`https://patentcenter.uspto.gov/retrieval/public/v2/application/data?applicationNumberText=${applicationNumber}`);
 
         const data = response.data;
@@ -224,14 +225,16 @@ app.post('/fetch-granted-patent', async (req, res) => {
         const patentNumber = applicationMetaData.patentNumber || '';
 
         if (patentNumber) {
-           
+            // Construct the download URL using the patentNumber
             const pdfDownloadURL = `https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/${patentNumber}`;
 
+            // Define the path where you want to save the JSON file
             const filePath = path.join(__dirname, 'downloads', `${patentNumber}.json`);
 
-      
+            // Save the response data as a JSON file
             fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 
+            // Respond with the download URL
             res.json({ pdfDownloadURL });
         } else {
             res.status(500).json({ message: 'Patent number not found in response.' });
@@ -271,23 +274,25 @@ app.post('/fetch-granted-patent', async (req, res) => {
 //     }
 // });
 
-
+// Server-side route to handle download request
 app.post('/fetch-patent-data', async (req, res) => {
     const { patentNumber } = req.body;
 
     try {
-      
+        // Construct the URL for the API request
         const apiUrl = `https://patentcenter.uspto.gov/retrieval/public/v2/application/data?patentNumber=${patentNumber}`;
 
         const response = await axios.get(apiUrl);
         const responseData = response.data;
 
+        // Extract the "applicationNumberText" from the response
         const applicationNumberText = responseData.applicationMetaData.applicationIdentification.applicationNumberText.trim();
 
-        
+        // Store the response data in a local file
+        // You may modify this part to store the response in a directory
         fs.writeFileSync(`responses/${patentNumber}.json`, JSON.stringify(responseData, null, 2));
 
-       
+        // Pass the application number to the client-side
         res.json({ applicationNumberText });
     } catch (error) {
         console.error('Error:', error);
