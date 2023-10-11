@@ -264,36 +264,6 @@ app.post('/fetch-granted-patent', async (req, res) => {
 //     }
 // });
 
-app.post('/fetch-patent-application', async (req, res) => {
-    try {
-        const { patentNumber } = req.body;
-
-        const response = await axios.get(`https://patentcenter.uspto.gov/retrieval/public/v2/application/data?patentNumber=${patentNumber}`);
-
-        if (response.status === 200) {
-            // Extract applicationNumberText from the response
-            const applicationNumberText = response.data.applicationMetaData.applicationIdentification.applicationNumberText;
-
-            if (applicationNumberText) {
-                // Log the response data you're interested in
-                console.log('Application Number Text:', applicationNumberText);
-
-                res.json({ message: 'Application data fetched successfully.' });
-            } else {
-                console.error('Application number not found in the response.');
-                res.status(400).send('Application number not found in the response.');
-            }
-        } else {
-            console.error('Failed to fetch application data.');
-            res.status(500).send('Failed to fetch application data.');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).send(`Error: ${error.message}`);
-    }
-});
-
-
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
