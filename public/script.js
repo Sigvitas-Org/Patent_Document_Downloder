@@ -368,12 +368,12 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
     downloadButtonContainer.style.display = 'none';
 
     // Validate patent number
-    if (!/^\d{8}$/.test(patentNumber)) {
-        alert('Please enter a valid number.');
-        preloader.style.display = 'none';
-        downloadButtonContainer.style.display = 'block';
-        return;
-    }
+    // if (!/^\d{8}$/.test(patentNumber)) {
+    //     alert('Please enter a valid number.');
+    //     preloader.style.display = 'none';
+    //     downloadButtonContainer.style.display = 'block';
+    //     return;
+    // }
 
     if (documentType === 'application' && patentAsFiledCheckbox.checked) {
         const selectedDocumentCodes = [];
