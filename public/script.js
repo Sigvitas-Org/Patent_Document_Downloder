@@ -115,11 +115,11 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
                         alert('Failed to send application number to the server.');
                     }
                 } else {
-                    alert('Failed to fetch application data.');
+                    // alert('Failed to fetch application data.');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to fetch application data.');
+                // alert('Failed to fetch application data.');
             } finally {
                 preloader.style.display = 'none';
                 downloadButtonContainer.style.display = 'block';
@@ -212,11 +212,11 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
                         alert('Please select at least one sub-document to download.');
                     }
                 } else {
-                    alert('Failed to fetch application data.');
+                    // alert('Failed to fetch application data.');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to fetch application data.');
+                // alert('Failed to fetch application data.');
             } finally {
                 preloader.style.display = 'none';
                 downloadButtonContainer.style.display = 'block';
@@ -427,11 +427,11 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
                         alert('Please select at least one sub-document to download.');
                     }
                 } else {
-                    alert('Failed to fetch application data.');
+                    // alert('Failed to fetch application data.');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to fetch application data.');
+                // alert('Failed to fetch application data.');
             } finally {
                 preloader.style.display = 'none';
                 downloadButtonContainer.style.display = 'block';
