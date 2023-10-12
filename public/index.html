@@ -25,7 +25,8 @@
         <div id="patentCheckboxes" class="checkbox-container">
             <div class="column">
                 <label class="checkbox-inline1" for="patentAsFiledCheckbox">
-                    <input type="checkbox" id="patentAsFiledCheckbox" name="patentAsFiledCheckbox"> Patent as Filed
+                    <input type="checkbox" id="patentAsFiledCheckbox" name="patentAsFiledCheckbox" onclick="fun()">
+                    Patent as Filed
                 </label>
                 <div id="subCheckboxes" style="display: none;">
                     <div class="checkbox-group">
@@ -40,23 +41,36 @@
                         <input type="checkbox" id="specificationCheckbox" name="specificationCheckbox" value="SPEC">
                         <label for="specificationCheckbox">Specification</label>
                     </div>
-                    <button type="submit" id="getPatentAsFiledButton" style="display: none;">Get Patent as Filed</button>
 
                 </div>
+
+
             </div>
             <div class="column">
                 <label class="checkbox-inline1" for="grantedCheckbox">
-                    <input type="checkbox" id="grantedCheckbox" name="grantedCheckbox">Patent as Granted
+                    <input type="checkbox" id="grantedCheckbox" name="grantedCheckbox" onclick="fun()">Patent as Granted
                 </label>
             </div>
         </div>
-            <br>
-            <br>
-            <button type="submit" id="getGrantedButton" style="display: none;">Get Granted Document</button>
-            <!-- <input type="submit" value="Get Document"><br> -->
-            <br>
-            <br>
-            <button type="button" id="resetButton" class="reset-button" onclick="location.reload();">Reset</button>
+
+        <div>
+            <table>
+                <tr>
+                    <th>
+                        <button type="submit" id="getPatentAsFiledButton" style="display: none;">Get Patent as
+                            Filed</button>
+                    </th>
+                    <th>
+                        <button type="submit" id="getGrantedButton" class="getGrantedButton1" style="display: none;">Get
+                            Granted Document</button>
+                    </th>
+                </tr>
+            </table>
+        </div>
+        <!-- <input type="submit" value="Get Document"><br> -->
+        <br>
+        <br>
+        <button type="button" id="resetButton" class="reset-button" onclick="location.reload();">Reset</button>
     </form>
     <div id="preloader" class="preloader">
         <div class="loader"></div>

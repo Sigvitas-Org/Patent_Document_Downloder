@@ -110,6 +110,7 @@ a[id^="download"] {
     font-weight: bold;
     color: #333;
 }
+
 #patentAsFiledSection {
     display: inline-block;
 }
@@ -121,6 +122,7 @@ a[id^="download"] {
     gap: 20px;
     /* Add spacing between columns */
 }
+
 .checkbox-inline {
     font-weight: normal;
     color: #666;
@@ -154,7 +156,7 @@ a[id^="download"] {
 
 }
 
-#getGrantedButton {
+.getGrantedButton1 {
     margin-left: 14em;
 }
 
@@ -164,7 +166,7 @@ a[id^="download"] {
     margin-top: 20px;
 }
 
-.loader {   
+.loader {
     border: 8px solid #f3f3f3;
     border-top: 8px solid #3498db;
     border-radius: 50%;
@@ -303,6 +305,7 @@ input[type="submit"],
     cursor: pointer;
     font-size: 14px;
 }
+
 #getGrantedButton,
 input[type="submit"],
 .reset-button {
@@ -313,7 +316,7 @@ input[type="submit"],
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    margin-top: -4em;
+    /* margin-top: -4em; */
 }
 
 /* Hover effect for buttons */

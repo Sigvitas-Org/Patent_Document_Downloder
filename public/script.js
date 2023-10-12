@@ -25,9 +25,6 @@ document.getElementById('resetButton').addEventListener('click', function () {
     clearCache();
 });
 
-
-
-
 // Get Granted if application & Granted is checked
 document.getElementById('getGrantedButton').addEventListener('click', async function () {
     const documentType = document.getElementById('documentType').value;
@@ -77,7 +74,7 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
 
     // ...
     // ...
-    
+
     if (documentType === 'granted' && patentAsFiledCheckbox.checked) {
         const selectedDocumentCodes = [];
 
@@ -123,11 +120,14 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
             } finally {
                 preloader.style.display = 'none';
                 downloadButtonContainer.style.display = 'block';
+                // getGrantedButton.style.margin = "0 0 0 0";
+
             }
         } else {
             alert('Please select at least one sub-document to download.');
             preloader.style.display = 'none';
             downloadButtonContainer.style.display = 'block';
+            // getGrantedButton.style.margin = "0 0 0 0";
         }
     }
     // ...
@@ -206,7 +206,7 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
                             // Redirect to the page to download documents
                             window.location.href = '/fetch-application-documents';
                         } else {
-                            alert("Failed to trigger app.js.");
+                            alert("Application Documnet Not Found");
                         }
                     } else {
                         alert('Please select at least one sub-document to download.');
@@ -266,6 +266,7 @@ document.getElementById('getGrantedButton').addEventListener('click', async func
         } finally {
             // Hide the loading message
             loadingMessage.style.display = 'none';
+            // getGrantedButton.style.margin = "0 0 0 0em";
         }
     }
 });
@@ -334,11 +335,11 @@ document.getElementById('documentForm').addEventListener('submit', async functio
                 // Directly trigger download after processing
                 window.location.href = '/fetch-application-documents';
             } else {
-                alert("Failed to trigger app.js.");
+                alert("Application Document not found");
             }
         } catch (error) {
             console.error('Error:', error);
-            alert("Failed to trigger app.js.");
+            alert("Application Document not found");
         } finally {
             preloader.style.display = 'none';
             downloadButtonContainer.style.display = 'block';
@@ -421,7 +422,7 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
                             // Redirect to the page to download documents
                             window.location.href = '/fetch-application-documents';
                         } else {
-                            alert("Failed to trigger app.js.");
+                            alert("Application Document not Found");
                         }
                     } else {
                         alert('Please select at least one sub-document to download.');
@@ -448,13 +449,18 @@ document.getElementById('getPatentAsFiledButton').addEventListener('click', asyn
 document.getElementById('patentAsFiledCheckbox').addEventListener('change', function () {
     const subCheckboxes = document.getElementById('subCheckboxes');
     const getPatentAsFiledButton = document.getElementById('getPatentAsFiledButton');
+    const getGrantedButton = document.getElementById('getGrantedButton');
 
     if (this.checked) {
         subCheckboxes.style.display = 'block';
         getPatentAsFiledButton.style.display = 'block';
+        // getGrantedButton.style.margin = "0 0 0 0";
+
     } else {
         subCheckboxes.style.display = 'none';
         getPatentAsFiledButton.style.display = 'none';
+        // getGrantedButton.style.margin = "0 0 0 14em";
+
     }
 });
 
@@ -463,10 +469,29 @@ document.getElementById('grantedCheckbox').addEventListener('change', function (
 
     if (this.checked) {
         getGrantedButton.style.display = 'block';
+        // getGrantedButton.style.margin = "0 0 0 14em";
     } else {
         getGrantedButton.style.display = 'none';
+        // getGrantedButton.style.margin = "0 0 0 0";
     }
 });
 window.addEventListener('load', function () {
     clearCache();
 });
+
+
+function fun() {
+    var a = document.getElementById('grantedCheckbox');
+    var b = document.getElementById('patentAsFiledCheckbox');
+    //    console.log('fuck :__',a.checked);
+    const div = document.getElementById('getGrantedButton') // Get element from DOM
+
+
+    if (a.checked && b.checked) {
+
+        div.classList.remove('getGrantedButton1'); // Remove class "info"
+
+    } else {
+        div.classList.add('getGrantedButton1');
+    }
+}
